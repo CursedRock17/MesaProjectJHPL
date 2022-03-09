@@ -2,18 +2,21 @@ import { StyleSheet, Text, View, Button, SafeAreaView, Alert, Image, ImageBackgr
 import { BleManager, Device, DeviceId, Service, Subscription } from 'react-native-ble-plx';
 import React, { useState, useContext } from 'react';
 import { Extendor } from './bleExtender';
+import { DataReader } from './services'
 
-const kanye = { uri: "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/cda1ea66315731.5b127ad13547f.jpg" };
-
+const backImage = { uri: "https://tse2.mm.bing.net/th?id=OIP.RYVznDEGM-r8C6dNTpLT9gHaEK&pid=Api&P=0&w=372&h=209" };
+const otherIm = { uri: "https://tse4.mm.bing.net/th?id=OIP.YaqlKDmq0mPrnvljys4FFQHaEo&pid=Api&P=0&w=346&h=216"}
 const App = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.title}>
-        <Text style={{ fontSize: 55 }}> Title </Text>
-      </View>
-      <ImageBackground style={styles.imageStyles} source={kanye}>
-        <Extendor />
+      <ImageBackground source={otherIm}>
+        <View style={styles.title}>
+          <Text style={{ fontSize: 45 }}> Respiration Device </Text>
+        </View>
+        <ImageBackground style={styles.imageStyles} source={backImage}>
+          <Extendor />
+        </ImageBackground>
       </ImageBackground>
     </SafeAreaView>
   );
@@ -49,7 +52,7 @@ const styles = StyleSheet.create({
      flex: 10,
      alignItems: 'center',
      justifyContent: 'center',
-     width: 300,
+     width: 400,
      height: 550,
    }
 });
