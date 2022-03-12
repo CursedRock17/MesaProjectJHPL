@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View, Button, SafeAreaView, Alert, Image, ImageBackground } from 'react-native';
 import { BleManager, Device, DeviceId, Service, Subscription } from 'react-native-ble-plx';
 import React, { useState, useContext } from 'react';
-import { Extendor } from './bleExtender';
-import { DataReader } from './services'
+import { Extendor } from './components/bleExtender';
+import { DataReader } from './components/services'
 
 const backImage = { uri: "https://tse2.mm.bing.net/th?id=OIP.RYVznDEGM-r8C6dNTpLT9gHaEK&pid=Api&P=0&w=372&h=209" };
 const otherIm = { uri: "https://tse4.mm.bing.net/th?id=OIP.YaqlKDmq0mPrnvljys4FFQHaEo&pid=Api&P=0&w=346&h=216"}

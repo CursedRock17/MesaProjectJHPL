@@ -12,7 +12,16 @@ import {
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { DataReader } from './services'
 
-    const manager = new BleManager();
+  const manager = new BleManager({
+    restoreStateIdentifier: 'BleInTheBackground',
+    restoreStateFunction: restoredState => {
+      if (restoredState == null) {
+        // BleManager was constructed for the first time.
+  } else {
+    // BleManager was restored. Check `restoredState.connectedPeripherals` property.
+      }
+    },
+  });
 
 /*We begin by creating the one and only instance of BleManager to call the APIs, then create a component
 The component checks if Ble is powered on, then searches for availble devices, trying to find the Adafruit
@@ -20,6 +29,24 @@ this Adafruit will be found or the timer will end the search, we then setState f
 */
 
     const Extendor = () => {
+
+      const ConnectedButton = () => {
+
+        return (
+          <>
+          <Button
+                style={styles.connectButton}
+                title="Connect Device"
+                onPress={componentWillMount}
+            />
+          <Text style ={styles.normalText}> {"Connect to the Respiration Device"} </Text>
+          </>
+        )
+      }
+
+      const uARTService = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+      const rxChar = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+      const txChar = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
     const [connectedState, setConnectedState] = useState(false);
     const [ deviceState, setDeviceState ] = useState("Connect to the Respiration Device")
@@ -36,13 +63,13 @@ this Adafruit will be found or the timer will end the search, we then setState f
 }
 
   const disconnectDevice = () => {
-    const ender = manager.cancelDeviceConnection(bleDevice.id);
+    manager.cancelDeviceConnection(bleDevice.id);
     setBleDevice(null)
-    console.log("Ballz", bleDevice)
+    setDeviceState("Connect to the Respiration Device");
   }
 
   const scanTime = () => {
-    manager.startDeviceScan(null, null, (error, device) => {
+    manager.startDeviceScan([uARTService], {allowDuplicates: true}, (error, device) => {
 
               setDeviceState("Loading...")
 
@@ -52,6 +79,8 @@ this Adafruit will be found or the timer will end the search, we then setState f
 
               if(device.name === 'Adafruit Bluefruit LE') {
 
+                device.connect();
+
                 manager.stopDeviceScan();
                 setDeviceState("All Connected to")
 
@@ -59,14 +88,14 @@ this Adafruit will be found or the timer will end the search, we then setState f
 
                 device = bleDevice
 
-                console.log(bleDevice);
-
               }
         });
       }
 
       useEffect(() => {
-
+          manager.onDeviceDisconnected(bleDevice, (error, bleDevice) => {
+            console.log("DeviceState:",  deviceState)
+          })
       }, []);
 
       return (
@@ -83,20 +112,12 @@ this Adafruit will be found or the timer will end the search, we then setState f
         </Text>
         <Text style={styles.normalText}>
           BPM:
-          <DataReader bleDevice={bleDevice} />
+          <DataReader bleDevice={bleDevice} setBleDevice={() => setBleDevice()} />
         </Text>
           <Text style= {styles.bpmText}>
         </Text>
         </>
-
-        : <>
-        <Button
-              style={styles.connectButton}
-              title="Connect Device"
-              onPress={componentWillMount}
-          />
-        <Text style ={styles.normalText}> {deviceState} </Text>
-        </>
+        : <ConnectedButton />
       }
 
       {deviceState == "Loading..." ?
@@ -114,6 +135,7 @@ this Adafruit will be found or the timer will end the search, we then setState f
 
 //The return statement is a few simple buttons and text with dynamic blocks of
 //jsx code and jsx fragments(<> and </>) to allow for the use of custom comps.
+//Accesses the StyleSheet in order to make the layout look nice seen with the respective styles
 
 //Basic Styles StyleSheet
 
@@ -157,11 +179,5 @@ const styles = StyleSheet.create({
 export { Extendor }
 
 /*
-  TODO: Create a disconnect function that works normally
-  Disconnect device if the user leaves the app or something like that
-  Add a cancel button during loading process in case they get stuck
-  or just create a 10 seconds timer, that's pry easier
 
-  Also - Comment code for judges and everybody else and add notifactions
-  (Do notifications on Friday and Thursday)
 */
