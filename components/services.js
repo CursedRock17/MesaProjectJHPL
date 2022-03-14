@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import {View, SafeAreaView, Text, Button, ImageBackground, Alert} from 'react-native'
-import { Device, Service, Characteristic, Descriptor} from 'react-native-ble-plx'
-import { Extendor } from './bleExtender'
+import React, { useState, useEffect } from 'react';
+import {View, SafeAreaView, Text, Button, ImageBackground, Alert} from 'react-native';
+import { Device, Service, Characteristic, Descriptor} from 'react-native-ble-plx';
+import { Extendor } from './bleExtender';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
+
+import { Base64 } from 'js-base64';
 
 //Currently these are the channels that rx and tx use for the uART serivce
 //Must pass props in order to get the device (bleDevice) and gain our information
@@ -10,9 +13,11 @@ const DataReader =  ( props ) => {
   const rxChar = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
   const txChar = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
-  const [ renderState, setRenderState ] = useState(false)
   const [ characteristics, setCharacteristics] = useState([]);
   const [ rate, setRate ] = useState();
+  const [ triggerOnce, setTriggerOnce ] = useState(0)
+
+  PushNotificationIOS.requestPermissions();
 
   useEffect(() => {
 
@@ -36,6 +41,7 @@ const DataReader =  ( props ) => {
 
       const newCharacteristics = await discoveredServices[2].characteristics();
       const currentChar = newCharacteristics[0];
+      const secondaryChar = newCharacteristics[1];
 
       currentChar.monitor((err, cha) => {
       if (err) {
@@ -43,38 +49,41 @@ const DataReader =  ( props ) => {
         return;
       }
 
-      setRate(atob(cha?.value));
+      var datar = Base64.atob(cha?.value)
+      setRate(datar);
     }, null);
+
+
+    if(props.resetNumber == 1){
+      const baseOut = Base64.btoa("A");
+      Alert.alert("Device Reset")
+
+      secondaryChar.writeWithResponse(baseOut, null)
+    }
 
     }
 
     getInformations();
-    console.log("Rate: ",rate)
+    if(rate <= 5 && rate >= 0){
+      setColor("Red")
+      console.log("datar", rate)
+      PushNotificationIOS.addNotificationRequest({
+        id: "1",
+        title: "Safe Sleeper",
+        subtitle: "Your baby may be in serious trouble"
+      });
+    }
+    console.log("Rate: ", rate)
   } //End of check if device is connected
+  //Needed to use Base64.atob to decode the characteristic value for the BPM
 
 }) //useEffect ending
 
-  const sayHello = async () => {
-    if(!renderState){
-      setRenderState(true);
-    }
-
-    else {
-      setRenderState(false);
-    }
-
-  }
-
   return (
     <>
-    <Text style={{ fontSize: 30, color: 'white' }}>
+    <Text style={{ fontSize: 50, color: "Black"}}>
       {rate}
     </Text>
-    <Button
-      title="Refresh"
-      onPress={sayHello}
-    >
-    </Button>
     </>
   )
 }
