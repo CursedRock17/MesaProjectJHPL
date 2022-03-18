@@ -16,6 +16,7 @@ const DataReader =  ( props ) => {
   const [ characteristics, setCharacteristics] = useState([]);
   const [ rate, setRate ] = useState();
   const [ triggerOnce, setTriggerOnce ] = useState(0)
+  const [ deathCount, setDeathCount ] = useState(0);
 
   PushNotificationIOS.requestPermissions();
 
@@ -36,7 +37,7 @@ const DataReader =  ( props ) => {
       const discoveredServices = await allServices.services();
 
       discoveredServices.forEach(async (service) => {
-        console.log(await service.characteristics())
+        return;
       })
 
       const newCharacteristics = await discoveredServices[2].characteristics();
@@ -50,7 +51,20 @@ const DataReader =  ( props ) => {
       }
 
       var datar = Base64.atob(cha?.value)
-      setRate(datar);
+      if(datar == null){
+        return;
+      }
+      else {
+        setRate(datar);
+      }
+
+      if(datar >= 0 && datar <= 5){
+        setDeathCount(deathCount + 1);
+        console.log(deathCount);
+      }
+      else {
+        setDeathCount(0)
+      }
     }, null);
 
 
@@ -64,14 +78,14 @@ const DataReader =  ( props ) => {
     }
 
     getInformations();
-    if(rate <= 5 && rate >= 0){
-      setColor("Red")
+    if(deathCount >= 3){
       console.log("datar", rate)
       PushNotificationIOS.addNotificationRequest({
         id: "1",
         title: "Safe Sleeper",
         subtitle: "Your baby may be in serious trouble"
       });
+      setDeathCount(0)
     }
     console.log("Rate: ", rate)
   } //End of check if device is connected
@@ -81,7 +95,7 @@ const DataReader =  ( props ) => {
 
   return (
     <>
-    <Text style={{ fontSize: 50, color: "Black"}}>
+    <Text style={{ fontSize: 50 }}>
       {rate}
     </Text>
     </>

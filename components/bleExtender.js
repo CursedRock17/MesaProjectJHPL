@@ -209,9 +209,7 @@ this Adafruit will be found or the timer will end the search, we then setState f
         </Text>
 
         <Animated.View style={[styles.circleBPMDisplay, jiggleSet]}>
-          <Text>
             <DataReader bleDevice={bleDevice} resetNumber={resetNumber} setBleDevice={() => setBleDevice()} />
-          </Text>
         </Animated.View>
 
         <View style={styles.ender}>
